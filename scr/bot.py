@@ -1,13 +1,12 @@
 import asyncio
-from turtledemo.clock import setup
 
-from aiogram import Dispatcher, Bot, F
-from aiogram.fsm.context import FSMContext
+from aiogram import Dispatcher, Bot
 from aiogram.fsm.storage.base import DefaultKeyBuilder
 from aiogram.fsm.storage.redis import RedisStorage
-from aiogram.types import Message
 from aiogram_dialog import setup_dialogs
 
+from scr.dialogs.qa_menu_dialog_router import qa_menu_dialog_router
+from scr.routers.start.start_router import start_router
 from scr.settings import DEBUG, redis_connect_url, bot_test_token, bot_token
 
 
@@ -23,13 +22,15 @@ async def bot_start():
         dp = Dispatcher(storage=storage)
         bot = Bot(token=bot_token)
 
-    @dp.message(F.text)
-    async def test_handler(message: Message, state: FSMContext):
-        await message.answer(
-            text=message.text
-        )
-
     setup_dialogs(dp)
+
+    dp.include_router(
+        start_router
+    )
+
+    dp.include_router(
+        qa_menu_dialog_router
+    )
 
     await bot.delete_webhook(
         drop_pending_updates=True
